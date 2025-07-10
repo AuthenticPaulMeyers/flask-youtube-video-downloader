@@ -17,9 +17,10 @@ def index():
         # return redirect(url_for('downloader.index'))
 
         # download audio
+        quality = '720'
 
-        audio_downloader(url)
-        
+        video_downloader(url, quality)
+
     return render_template('index.html', form=form)
 
 
