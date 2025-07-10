@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="post" class="" autocomplete="off"> 
+        {{ form.hidden_tag()}}
+        <div class="flex flex-row align-center justify-center">
+        <div>
+            {{ form.link(autofocus="on") }}
+            {% for error in form.link.errors %}
+                <span class="text-sm text-red-800">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <button type="submit" class="bg-gray-900 text-white py-4 px-8 rounded-full">Start</button>
+        </div>
+    </form>
+{% endblock %}
