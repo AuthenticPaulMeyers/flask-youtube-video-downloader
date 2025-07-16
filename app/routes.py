@@ -11,16 +11,15 @@ def index():
 
     url = form.link.data
 
-    if  form.validate_on_submit() or request.method == 'POST':
-        # print("video link", url)
-        # print(get_url_info(url))
-        # return redirect(url_for('downloader.index'))
+    if form.validate_on_submit():
+        info = get_url_info(url)
+        quality = request.form.get('quality')
+        action = request.form.get('action')
 
-        # download audio
-        quality = '720'
-
-        video_downloader(url, quality)
-
+        if action == "download":
+            response = video_downloader(url, quality)
+            print(response)
+        return render_template('index.html', form=form, info=info)
     return render_template('index.html', form=form)
 
 

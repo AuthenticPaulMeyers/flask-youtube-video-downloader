@@ -1,10 +1,12 @@
-
+from flask import jsonify, Response, request
+import os
+import re
+import subprocess
+import yt_dlp
 # Required:
 # Create a video downloader function wrap the download video functionalities.
 # Pass arguements such as video quality and format.
-# Create audio downloader function and pass the arguement such as audio format and size.
-import yt_dlp
-import os
+# Create audio downloader function and pass the arguement such as audio format.
 
 # Get the path to the user's Downloads folder
 home_dir = os.path.expanduser("~")
@@ -28,31 +30,14 @@ def get_url_info(url):
 
         title = info_dict.get('title', 'N/A')
         thumbnail_url = info_dict.get('thumbnail', 'N/A')
-        formats = info_dict.get('formats', [])
 
-        for f in formats:
-            ext = f.get('ext', 'N/A')
-            resolution = f.get('resolution', 'N/A') # e.g., '1920x1080' or 'audio only'
-            vcodec = f.get('vcodec', 'N/A')
-            acodec = f.get('acodec', 'N/A')
-            filesize_bytes = f.get('filesize') or f.get('filesize_approx') # Approximate size
-            filesize_mb = "N/A"
-            if filesize_bytes:
-                filesize_mb = f"{filesize_bytes / (1024 * 1024):.2f} MB"
-
-        return({
-            'info':{
-                'title': title,
-                'thumbnail': thumbnail_url,
-                'format': ext,
-                'filesize_mb': filesize_mb
+        return {'video_title': title, 'thumbnail': thumbnail_url,
             }
-        })
     
     except yt_dlp.utils.DownloadError as e:
-        return({'error': f'An error occurred during download: {e}'})
+        return {'error': f'An error occurred during download: {e}'}, 400
     except Exception as e:
-        return({'error': f'An unexpected error occurred: {e}'})
+        return {'error': f'An unexpected error occurred: {e}'}, 400
 
 # A function to download videos
 def video_downloader(url, quality):
@@ -61,17 +46,15 @@ def video_downloader(url, quality):
         'format': f'bestvideo[ext=mp4][height<={quality}]+bestaudio[ext=m4a]/best[ext=mp4][height<={quality}]',
     }
 
-    with yt_dlp.YoutubeDL(download_options) as video:
-        video.download([url])
-
     try:
-        with yt_dlp.YoutubeDL(download_options) as audio:
+        with yt_dlp.YoutubeDL(download_options) as video:
             video.download([url])
-        return({'message': 'Video downloaded successfully.'})
+        return {'message': 'Video downloaded successfully.'}, 200
+    
     except yt_dlp.utils.DownloadError as e:
-        return({'error': f'An error occurred during download: {e}'})
+        return {'error': f'An error occurred during download: {e}'}, 400
     except Exception as e:
-        return({'error': f'An unexpected error occurred: {e}'})
+        return {'error': f'An unexpected error occurred: {e}'}, 400
     
 # A function to download audios
 def audio_downloader(url):
@@ -88,8 +71,10 @@ def audio_downloader(url):
     try:
         with yt_dlp.YoutubeDL(download_options) as audio:
             audio.download([url])
-        return({'message': 'Audio downloaded successfully.'})
+        return {'message': 'Audio downloaded successfully.'}, 200
+    
     except yt_dlp.utils.DownloadError as e:
-        return({'error': f'An error occurred during download: {e}'})
+        return {'error': f'An error occurred during download: {e}'}, 400
     except Exception as e:
-        return({'error': f'An unexpected error occurred: {e}'})
+        return {'error': f'An unexpected error occurred: {e}'}, 400
+    

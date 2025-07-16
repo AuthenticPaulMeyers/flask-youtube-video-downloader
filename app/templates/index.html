@@ -12,5 +12,20 @@
         </div>
         <button type="submit" class="bg-gray-900 text-white py-4 px-8 rounded-full">Start</button>
         </div>
+        {% if info %}
+            <img src="{{ info['thumbnail'] }}" alt="Video thumbnail" style="width: 100px;">
+            <h2>{{ info['video_title'] }}</h2>
+
+                <select name="quality" id="quality">
+                    <option disabled selected>-- Choose --</option>
+                    <option value="1080">1080p</option>
+                    <option value="720">720p</option>
+                    <option value="360">360p</option>
+                </select>
+                <button type="submit" name="action" value="download">Download</button>
+        {% endif %}
     </form>
+    {% if response %}
+        <span>{{ response['message'] }}</span>
+    {% endif %}
 {% endblock %}
