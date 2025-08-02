@@ -2,12 +2,12 @@
 
 {% block content %}
 
-    <section class="py-10 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12">
+    <section class="py-10 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12 flex items-center flex-col justify-center">
         <h2 class="mb-2 text-2xl font-bold tracking-tight">YouTube Video Downloader</h2>
-        <form method="post" class="" autocomplete="off"> 
+        <form method="post" class="flex flex-col items-center" autocomplete="off"> 
             {{ form.hidden_tag()}}
-            <div class="max-w-sm">
-                <div class="input-container flex flex-row max-w-screen-xl">
+            <div class="max-w-sm max-w-xl lg:w-120">
+                <div class="input-container flex flex-row">
                     {{ form.link(autofocus="on", class="input-text") }}
                     {% for error in form.link.errors %}
                         <span class="text-sm text-red-800">{{ error }}</span>
@@ -17,10 +17,10 @@
                 </div>
             </div>
             {% if info %}
-                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm mt-6 p-4">
+                <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm mt-6 p-3 max-w-xl lg:w-120">
                     <div class="">
                         <img src="{{ info['thumbnail'] }}" alt="Video thumbnail" class="rounded-t-lg">
-                        <h2 class="mb-2 text-xl font-semibold tracking-tight">{{ info['video_title'] }}</h2>
+                        <h2 class="m-2 text-xl font-semibold tracking-tight">{{ info['video_title'] }}</h2>
                     </div>
                     <div class="flex flex-row items-center md:flex-row md:max-w-xl p-4">
                         <select name="quality" id="quality" class=" border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full xmlns.5">
