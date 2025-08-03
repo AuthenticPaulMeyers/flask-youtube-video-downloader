@@ -19,12 +19,19 @@ def index():
 
         action = request.form.get('action')
 
-        if action == "download":
+        # Download video
+        if action == "download-video":
             if not quality:
                 return redirect(url_for('downloader.index'))
             
             response = video_downloader(url, quality)
             print(response)
+            
+        # Download audio
+        if action == "download-audio":
+            response = audio_downloader(url)
+            print(response)
+
         return render_template('index.html', form=form, info=info)
     return render_template('index.html', form=form)
 

@@ -2,6 +2,7 @@
 
 *{
     font-family: "Montserrat", arial, sans-serif;
+    transition: 0.2s ease all;
 }
 
 body {
@@ -11,16 +12,12 @@ body {
     }
 .input-container{
         background-color: #ffffff;
-        border-radius: 1rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid #d1d5db;
         text-align: center;
         padding: 5px;
     }
-.start-button{
-    border-radius: 1rem;
-    cursor: pointer;
-}
+
 .container{
     background-color: red;
 }
@@ -34,3 +31,7 @@ body {
         font-size: .9rem;
         outline: none;
     }
+
+.hide{
+    display: none;
+}
