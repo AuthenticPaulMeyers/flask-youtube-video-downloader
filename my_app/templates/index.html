@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section class="py-10 px-4 mx-auto max-w-screen-xl text-center lg:py-14 lg:px-12 flex items-center flex-col">
+        <h2 class="mb-2 text-2xl font-bold tracking-tight">YouTube Video Downloader</h2>
+        <div id="progress-container">
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div id="status-message" class="message info" style="display: none;"></div>
+        </div>
+        <form method="post" class="" autocomplete="off"> 
+            {{ form.hidden_tag()}}
+            <div class="max-w-sm max-w-xl lg:w-120">
+                <div class="input-container rounded-lg flex flex-row">
+                    {{ form.link(autofocus="on", class="input-text url-input") }}
+                    {% for error in form.link.errors %}
+                        <span class="text-sm text-red-800">{{ error }}</span>
+                    {% endfor %}
+
+                    <button type="submit" class="start-btn bg-gray-900 text-white py-3 px-8 cursor-pointer rounded-lg hover:bg-gray-800">
+                        <span class="start-text">Start</span>
+                        <div class="loader hide"></div>
+                    </button>
+                </div>
+            </div>
+            <div class="display-card">
+            {% if info %}
+            <div class="max-w-sm bg-white border border-gray-200 rounded-lg mt-20 p-3 max-w-xl lg:w-120 position: relative">
+                <div class="position: absolute -top-13 left-0 border border-gray-200 p-1 rounded-lg bg-white">
+                    <button type="button" class="px-7 py-2 cursor-pointer bg-gray-900 text-white rounded-lg js-video-button">Video</button>
+                    <button type="button" class="px-7 py-2 cursor-pointer js-audio-button text-gray-900 rounded-lg">Audio</button>
+                </div>
+                <!-- Video container starts -->
+                <div class="js-video-container">
+                    <div class="flex flex-row justify-between">
+                        <img src="{{ info['thumbnail'] }}" alt="Video thumbnail" class="rounded-lg h-24">
+                        <h2 class="m-2 text-xl font-semibold tracking-tight text-left">{{ info['video_title'] }}</h2>
+                    </div>
+                    <div class="flex flex-row items-center md:flex-row md:max-w-xl mt-4">
+                        <select name="quality" id="quality" class=" border border-gray-300 text-gray-900 rounded-lg focus:ring-gray-900 focus:border-gray-900 block w-full xmlns.5">
+                            <option disabled selected value="">-- Choose video quality --</option>
+                            <option value="1080">1080p</option>
+                            <option value="720">720p</option>
+                            <option value="360">360p</option>
+                        </select>
+                        <button type="submit" name="action" value="download-video" class="bg-gray-900 text-white rounded-lg py-2 px-4 cursor-pointer hover:bg-gray-800 mx-2 video-download-btn">Download</button>
+                    </div>
+                </div>
+                <!-- video container ends -->
+
+                <!-- Audio container starts -->
+                <div class="js-audio-container hide">
+                    <div class="flex flex-row justify-between">
+                        <img src="{{ info['thumbnail'] }}" alt="Video thumbnail" class="rounded-lg h-24">
+                        <h2 class="m-2 text-xl text-left font-semibold tracking-tight">{{ info['video_title'] }} - audio</h2>
+                    </div>
+                    <div class="flex flex-row items-center md:flex-row md:max-w-xl mt-4">
+                        <div class="border border-gray-300 text-gray-900 rounded-lg py-2 px-4 w-full xmlns.5">
+                            Audio Mp3
+                        </div>
+                        <button type="submit" name="action" value="download-audio" class="bg-gray-900 text-white rounded-lg py-2 px-4 cursor-pointer hover:bg-gray-800 mx-2">Download</button>
+                    </div>
+                </div>
+                <!-- Audio container ends -->
+            </div>
+        {% endif %}
+            </div>
+        </form>
+    </section>
+    <!-- Some JS-->
+     <!-- Connect with socketio -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+    <script>
+        // Add loader to the start button
+        const cardContainerEl = document.querySelector('.card-container');
+        const startBtnEl = document.querySelector('.start-btn');
+        const loaderEl = document.querySelector('.loader');
+        const startBtnText = document.querySelector('.start-text');
+        const qualitySelect = document.querySelector('#quality');
+        const urlInput = document.querySelector('.url-input');
+        const downloadBtn = document.querySelector('.video-download-btn');
+
+        // Disable the start button when the DOM content is loaded
+        startBtnEl.disabled = true
+        if(startBtnEl.disabled == true){
+            startBtnEl.classList.remove('bg-gray-900');
+            startBtnEl.classList.add('bg-gray-400');
+        }
+        // Activate the start button
+        urlInput.addEventListener('keyup', () => {
+            startBtnEl.disabled = false;
+            if(startBtnEl.disabled == false){
+                startBtnEl.classList.add('bg-gray-900');
+                startBtnEl.classList.remove('bg-gray-200');
+
+                startBtnEl.addEventListener('click', () => {
+                    if(cardContainerEl == null){
+                        loaderEl.classList.remove('hide');
+                        startBtnText.classList.add('hide');
+                    }else{
+                        loaderEl.classList.add('hide');
+                        startBtnText.classList.remove('hide');
+                    }
+                });
+            }
+        })
+
+        // show and hide audio and video containers when the buttons have clicked
+        const audioBtnEl = document.querySelector('.js-audio-button');
+        const videoBtnEl = document.querySelector('.js-video-button');
+        const videoContainerEl = document.querySelector('.js-video-container');
+        const audioContainerEl = document.querySelector('.js-audio-container');
+
+        // Add event on click to toggle between the containers
+        // Show audio container
+        audioBtnEl.addEventListener('click', () => {
+            if(videoBtnEl.classList.contains('bg-gray-900')){
+                videoBtnEl.classList.remove('bg-gray-900');
+                videoBtnEl.classList.remove('text-white');
+                videoBtnEl.classList.add('text-gray-900');
+                audioBtnEl.classList.add('bg-gray-900');
+                audioBtnEl.classList.add('text-white');
+                audioContainerEl.classList.remove('hide');
+                videoContainerEl.classList.add('hide');
+            }
+        });
+        // Show video container
+        videoBtnEl.addEventListener('click', () => {
+            if(audioBtnEl.classList.contains('bg-gray-900')){
+                audioBtnEl.classList.remove('bg-gray-900');
+                audioBtnEl.classList.remove('text-white');
+                audioBtnEl.classList.add('text-gray-900');
+                videoBtnEl.classList.add('bg-gray-900');
+                videoBtnEl.classList.add('text-white');
+                videoContainerEl.classList.remove('hide');
+                audioContainerEl.classList.add('hide');
+            }
+        });
+
+        // pass the video quality to the socket
+        const downloadForm = document.querySelector('form');
+        const progressBar = document.querySelector('.progress-bar');
+        const progressFill = document.querySelector('#progress-fill');
+        const statusMessage = document.querySelector('#status-message');
+
+        // Connect to the SocketIO server
+        const socket = io();
+
+        downloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const url = urlInput.value.trim();
+            const quality = qualitySelect.value;
+
+            if(!quality || quality === ""){
+                alert("Please select a valid video quality.")
+                return
+            }
+            if (url) {
+                // Display initial status message
+                statusMessage.textContent = 'Processing request...';
+                statusMessage.className = 'message info';
+                statusMessage.style.display = 'block';
+                progressBar.style.display = 'block';
+                
+                // Reset progress bar
+                progressFill.style.width = '0%';
+                progressFill.textContent = '';
+                
+                // Emit the request to the backend
+                socket.emit('download_request', { url: url, quality: quality });
+                
+                // Disable the button to prevent multiple requests
+                downloadBtn.disabled = true;
+            } else {
+                alert('Please enter a valid URL.');
+            }
+        });
+
+        // Listen for progress updates from the server
+        socket.on('progress', (data) => {
+            if (data.status === 'downloading') {
+                const percent = data.percent;
+                const speed = data.speed;
+                
+                progressFill.style.width = percent;
+                progressFill.textContent = percent;
+                
+                statusMessage.textContent = `Downloading...    | Speed: ${speed}`;
+                statusMessage.className = 'message info';
+                statusMessage.style.display = 'block';
+            } else if (data.status === 'finished') {
+                progressFill.style.width = '100%';
+                progressFill.textContent = '100%';
+                
+                statusMessage.textContent = `Download complete!`;
+                statusMessage.className = 'message success';
+                statusMessage.style.display = 'block';
+                
+                downloadBtn.disabled = false; // Re-enable button
+                return
+            } else if (data.status === 'error') {
+                progressBar.style.display = 'none';
+                statusMessage.textContent = data.message;
+                statusMessage.className = 'message error';
+                statusMessage.style.display = 'block';
+                
+                downloadBtn.disabled = false; // Re-enable button
+            }
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to server via SocketIO');
+        });
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+    </script>
+{% endblock %}
