@@ -9,7 +9,8 @@ A video downloader using youtube video links.
     * SocketIO
 
 2. Frontend
-    * HTML, CSS, & JS
+    * HTML, CSS & Tailwind CSS
+    * JavaScript
     * SocketIO
 
 # How it works
