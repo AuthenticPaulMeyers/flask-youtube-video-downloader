@@ -5,11 +5,13 @@ A video downloader using youtube video links.
 ## 1. Paste the video link
 <img src="/images/1.png">
 
-## 2. Select the video quality
+## 2. Select the video quality and click download
 <img src="/images/2.png">
 
-## 3. Switch between tabs to download audio
+## 3. Switch between tabs to download audio and click download
 <img src="/images/3.png">
 
 ## 4. Wait for the download to complete
 <img src="/images/4.png">
+
+## 5. Do it again -_-
