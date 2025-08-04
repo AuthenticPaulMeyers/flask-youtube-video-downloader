@@ -144,6 +144,36 @@ def video_downloader(url, quality, socketio):
 
 # A function to download audios
 def audio_downloader(url, socketio):
+
+    def download_hook(d):
+        status = d['status']
+        if status == 'downloading':
+            percent = d.get('_percent', '0%')
+            speed = d.get('_speed_str', 'N/A')
+            filename = os.path.basename(d.get('filename', 'Unknown'))
+
+            ansi_escape_pattern = re.compile(r'\x1b\[.*?m')
+            cleaned_speed = ansi_escape_pattern.sub('', speed).strip()
+        
+            socketio.emit('progress', {
+                'status': 'downloading',
+                'percent': f'{round(percent)}%',
+                'speed': cleaned_speed,
+                'filename': filename,
+            })
+        elif status == 'finished':
+            filename = d.get('filename', 'Unknown')
+            socketio.emit('progress', {
+                'status': 'finished',
+                'filename': os.path.basename(filename),
+                'message': 'Download complete!'
+            })
+        elif status == 'error':
+            error_message = d.get('error', 'Unknown error')
+            socketio.emit('progress', {
+                'status': 'error',
+                'message': f"Download failed: {error_message}"
+            })
     
     def download_thread():
         output_template = os.path.join(downloads_folder, '%(title)s.%(ext)s')
@@ -156,7 +186,7 @@ def audio_downloader(url, socketio):
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
-            'progress_hooks': [my_hook],
+            'progress_hooks': [download_hook],
         }
 
         try:

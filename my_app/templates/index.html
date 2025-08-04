@@ -34,9 +34,9 @@
                 </div>
                 <!-- Video container starts -->
                 <div class="js-video-container">
-                    <div class="flex flex-row justify-between">
+                    <div class="flex flex-row justify-between align-center">
                         <img src="{{ info['thumbnail'] }}" alt="Video thumbnail" class="rounded-lg h-24">
-                        <h2 class="m-2 text-xl font-semibold tracking-tight text-left">{{ info['video_title'] }}</h2>
+                        <h2 class="text-sm lg:text-xl px-3 font-semibold tracking-tight text-left">{{ info['video_title'] }}</h2>
                     </div>
                     <div class="flex flex-row items-center md:flex-row md:max-w-xl mt-4">
                         <select name="quality" id="quality" class=" border border-gray-300 text-gray-900 rounded-lg focus:ring-gray-900 focus:border-gray-900 block w-full xmlns.5">
@@ -49,18 +49,17 @@
                     </div>
                 </div>
                 <!-- video container ends -->
-
                 <!-- Audio container starts -->
                 <div class="js-audio-container hide">
-                    <div class="flex flex-row justify-between">
+                    <div class="flex flex-row justify-between align-center">
                         <img src="{{ info['thumbnail'] }}" alt="Video thumbnail" class="rounded-lg h-24">
-                        <h2 class="m-2 text-xl text-left font-semibold tracking-tight">{{ info['video_title'] }} - audio</h2>
+                        <h2 class="text-sm lg:text-xl text-left px-3 font-semibold tracking-tight">{{ info['video_title'] }} - audio</h2>
                     </div>
                     <div class="flex flex-row items-center md:flex-row md:max-w-xl mt-4">
                         <div class="border border-gray-300 text-gray-900 rounded-lg py-2 px-4 w-full xmlns.5">
                             Audio Mp3
                         </div>
-                        <button type="submit" name="action" value="download-audio" class="bg-gray-900 text-white rounded-lg py-2 px-4 cursor-pointer hover:bg-gray-800 mx-2">Download</button>
+                        <button type="submit" name="action" value="download-audio" id="audio-download-btn" class="bg-gray-900 text-white rounded-lg py-2 px-4 cursor-pointer hover:bg-gray-800 mx-2">Download</button>
                     </div>
                 </div>
                 <!-- Audio container ends -->
@@ -80,7 +79,8 @@
         const startBtnText = document.querySelector('.start-text');
         const qualitySelect = document.querySelector('#quality');
         const urlInput = document.querySelector('.url-input');
-        const downloadBtn = document.querySelector('.video-download-btn');
+        const downloadVideoBtn = document.querySelector('.video-download-btn');
+        const downloadAudioBtn = document.querySelector('#audio-download-btn');
 
         // Disable the start button when the DOM content is loaded
         startBtnEl.disabled = true
@@ -156,7 +156,8 @@
         // Connect to the SocketIO server
         const socket = io();
 
-        downloadBtn.addEventListener('click', (e) => {
+        // Download video
+        downloadVideoBtn.addEventListener('click', (e) => {
             e.preventDefault();
 
             const url = urlInput.value.trim();
@@ -177,18 +178,56 @@
                 // Reset progress bar
                 progressFill.style.width = '0%';
                 progressFill.textContent = '';
+
+                const FILE_TYPE = 'Video';
                 
                 // Emit the request to the backend
-                socket.emit('download_request', { url: url, quality: quality });
+                socket.emit('download_request', { url: url, quality: quality, file: FILE_TYPE });
                 
                 // Disable the button to prevent multiple requests
-                downloadBtn.disabled = true;
-                if(downloadBtn.disabled == true){
-                    downloadBtn.classList.remove('bg-gray-900');
-                    downloadBtn.classList.add('bg-gray-400');
-                    downloadBtn.classList.remove('cursor-pointer');
-                    downloadBtn.classList.remove('hover:bg-gray-800');
-                    downloadBtn.classList.add('cursor-not-allowed');
+                downloadVideoBtn.disabled = true;
+                if(downloadVideoBtn.disabled == true){
+                    downloadVideoBtn.classList.remove('bg-gray-900');
+                    downloadVideoBtn.classList.add('bg-gray-400');
+                    downloadVideoBtn.classList.remove('cursor-pointer');
+                    downloadVideoBtn.classList.remove('hover:bg-gray-800');
+                    downloadVideoBtn.classList.add('cursor-not-allowed');
+                }
+            } else {
+                alert('Please enter a valid URL.');
+            }
+        });
+
+        // Download audio
+        downloadAudioBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const url = urlInput.value.trim();
+
+            if (url) {
+                // Display initial status message
+                popUpContainer.classList.remove('hide')
+                statusMessage.textContent = 'Processing request...';
+                statusMessage.className = 'message info';
+                statusMessage.style.display = 'block';
+                progressBar.style.display = 'block';
+                
+                // Reset progress bar
+                progressFill.style.width = '0%';
+                progressFill.textContent = '';
+                
+                const FILE = 'Audio'
+                // Emit the request to the backend
+                socket.emit('download_request', { url: url, file: FILE});
+                
+                // Disable the button to prevent multiple requests
+                downloadVideoBtn.disabled = true;
+                if(downloadVideoBtn.disabled == true){
+                    downloadVideoBtn.classList.remove('bg-gray-900');
+                    downloadVideoBtn.classList.add('bg-gray-400');
+                    downloadVideoBtn.classList.remove('cursor-pointer');
+                    downloadVideoBtn.classList.remove('hover:bg-gray-800');
+                    downloadVideoBtn.classList.add('cursor-not-allowed');
                 }
             } else {
                 alert('Please enter a valid URL.');
@@ -221,13 +260,13 @@
                     popUpContainer.classList.add('hide');
                 });
                 
-                downloadBtn.disabled = false; // Re-enable button
-                if(downloadBtn.disabled == false){
-                    downloadBtn.classList.add('bg-gray-900');
-                    downloadBtn.classList.remove('bg-gray-400');
-                    downloadBtn.classList.add('cursor-pointer');
-                    downloadBtn.classList.add('hover:bg-gray-800');
-                    downloadBtn.classList.remove('cursor-not-allowed');
+                downloadVideoBtn.disabled = false; // Re-enable button
+                if(downloadVideoBtn.disabled == false){
+                    downloadVideoBtn.classList.add('bg-gray-900');
+                    downloadVideoBtn.classList.remove('bg-gray-400');
+                    downloadVideoBtn.classList.add('cursor-pointer');
+                    downloadVideoBtn.classList.add('hover:bg-gray-800');
+                    downloadVideoBtn.classList.remove('cursor-not-allowed');
                 }
                 return
             } else if (data.status === 'error') {
@@ -236,7 +275,7 @@
                 statusMessage.className = 'message error';
                 statusMessage.style.display = 'block';
                 
-                downloadBtn.disabled = false; // Re-enable button
+                downloadVideoBtn.disabled = false; // Re-enable button
             }
         });
 

@@ -23,24 +23,23 @@ def index():
 def handle_download_request(data):
     url = data['url']
 
-    print(data)
-    print('Received request from URL: ', url)
+    file = data['file']
+        
+    if not file:
+        return redirect(url_for('downloader.index'))
+
     if not url:
         return redirect(url_for('downloader.index'))
-    # Run the download process in a separate thread to prevent blocking
-    quality = data['quality']
-    if not quality:
-        return redirect(url_for('downloader.index'))
-    print(quality)
 
-    video_downloader(url, quality, socketio)
-    # # Download video
-    # if action == "download-video":
-    #     video_downloader(url, quality, socketio)
-        
-    # # Download audio
-    # if action == "download-audio":
-    #    audio_downloader(url, socketio)
+    # Download video
+    if file == 'Video':
+        quality = data['quality']
+        video_downloader(url, quality, socketio)
+
+    # Else Download audio when the url is provided
+    elif file == 'Audio':
+        audio_downloader(url, socketio)
+    
 
 
 
