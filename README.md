@@ -1,6 +1,17 @@
 # Flask youtube video downloader
 A video downloader using youtube video links.
 
+## Technologies used
+1. Backend
+    * Python
+    * Flask framework
+    * `yt_dlp` library
+    * SocketIO
+
+2. Frontend
+    * HTML, CSS, & JS
+    * SocketIO
+
 # How it works
 ## 1. Paste the video link
 <img src="/images/1.png">
