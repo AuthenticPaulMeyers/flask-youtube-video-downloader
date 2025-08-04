@@ -54,23 +54,17 @@ body {
 }
 @keyframes l3 {to{transform: rotate(1turn)}}
 
-/* progress bar */
-#progress-container {
-    margin-top: 1.5em;
-    text-align: left;
-}
 .progress-bar {
     width: 100%;
     background-color: #e0e0e0;
     border-radius: 4px;
     overflow: hidden;
     height: 25px;
-    display: none; /* Hide by default */
+    display: block; /* Hide by default */
 }
 .progress-bar-fill {
     height: 100%;
     width: 0;
-    background-color: #28a745;
     transition: width 0.3s ease;
     text-align: center;
     line-height: 25px;

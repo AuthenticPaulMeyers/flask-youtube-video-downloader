@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <section class="py-10 px-4 mx-auto max-w-screen-xl text-center lg:py-14 lg:px-12 flex items-center flex-col">
-        <h2 class="mb-2 text-2xl font-bold tracking-tight">YouTube Video Downloader</h2>
-        <div id="progress-container">
+    <section class="py-10 px-4 mx-auto max-w-screen-xl text-center lg:py-14 lg:px-12 flex items-center flex-col position: relative">
+        <div id="progress-container" class="hide position: absolute flex flex-col items-center bg-white w-80 lg:w-120 py-18 px-8 top-10 shadow-lg rounded-lg z-50">
+            <button type="button" class="js-close-btn hide position: absolute top-2 right-2 text-center flex cursor-pointer items-center align-center justify-center w-8 h-8 text-sm bg-gray-100 rounded-full p-2 hover:bg-gray-200"><i class="fa-solid fa-xmark"></i></button>
             <div class="progress-bar">
-                <div class="progress-bar-fill" id="progress-fill"></div>
+                <div class="progress-bar-fill bg-gray-900" id="progress-fill"></div>
             </div>
-            <div id="status-message" class="message info" style="display: none;"></div>
+            <div id="status-message" class="message info hidden"></div>
         </div>
-        <form method="post" class="" autocomplete="off"> 
+        <h2 class="mb-2 text-2xl font-bold tracking-tight">YouTube Video Downloader</h2>
+        <form method="post" class="" autocomplete="off">
             {{ form.hidden_tag()}}
             <div class="max-w-sm max-w-xl lg:w-120">
                 <div class="input-container rounded-lg flex flex-row">
@@ -86,13 +87,19 @@
         if(startBtnEl.disabled == true){
             startBtnEl.classList.remove('bg-gray-900');
             startBtnEl.classList.add('bg-gray-400');
+            startBtnEl.classList.remove('cursor-pointer');
+            startBtnEl.classList.remove('hover:bg-gray-800');
+            startBtnEl.classList.add('cursor-not-allowed');
         }
         // Activate the start button
-        urlInput.addEventListener('keyup', () => {
+        urlInput.addEventListener('keydown', () => {
             startBtnEl.disabled = false;
             if(startBtnEl.disabled == false){
                 startBtnEl.classList.add('bg-gray-900');
-                startBtnEl.classList.remove('bg-gray-200');
+                startBtnEl.classList.remove('bg-gray-400');
+                startBtnEl.classList.add('cursor-pointer');
+                startBtnEl.classList.add('hover:bg-gray-800');
+                startBtnEl.classList.remove('cursor-not-allowed');
 
                 startBtnEl.addEventListener('click', () => {
                     if(cardContainerEl == null){
@@ -143,6 +150,8 @@
         const progressBar = document.querySelector('.progress-bar');
         const progressFill = document.querySelector('#progress-fill');
         const statusMessage = document.querySelector('#status-message');
+        const closeProgressBtn = document.querySelector('.js-close-btn');
+        const popUpContainer = document.querySelector('#progress-container');
 
         // Connect to the SocketIO server
         const socket = io();
@@ -159,6 +168,7 @@
             }
             if (url) {
                 // Display initial status message
+                popUpContainer.classList.remove('hide')
                 statusMessage.textContent = 'Processing request...';
                 statusMessage.className = 'message info';
                 statusMessage.style.display = 'block';
@@ -173,6 +183,13 @@
                 
                 // Disable the button to prevent multiple requests
                 downloadBtn.disabled = true;
+                if(downloadBtn.disabled == true){
+                    downloadBtn.classList.remove('bg-gray-900');
+                    downloadBtn.classList.add('bg-gray-400');
+                    downloadBtn.classList.remove('cursor-pointer');
+                    downloadBtn.classList.remove('hover:bg-gray-800');
+                    downloadBtn.classList.add('cursor-not-allowed');
+                }
             } else {
                 alert('Please enter a valid URL.');
             }
@@ -193,12 +210,25 @@
             } else if (data.status === 'finished') {
                 progressFill.style.width = '100%';
                 progressFill.textContent = '100%';
-                
                 statusMessage.textContent = `Download complete!`;
                 statusMessage.className = 'message success';
                 statusMessage.style.display = 'block';
+                closeProgressBtn.classList.remove('hide');
+
+                // close the popup progress
+                closeProgressBtn.addEventListener('click', (e) => {
+                    e.preventDefault()
+                    popUpContainer.classList.add('hide');
+                });
                 
                 downloadBtn.disabled = false; // Re-enable button
+                if(downloadBtn.disabled == false){
+                    downloadBtn.classList.add('bg-gray-900');
+                    downloadBtn.classList.remove('bg-gray-400');
+                    downloadBtn.classList.add('cursor-pointer');
+                    downloadBtn.classList.add('hover:bg-gray-800');
+                    downloadBtn.classList.remove('cursor-not-allowed');
+                }
                 return
             } else if (data.status === 'error') {
                 progressBar.style.display = 'none';
