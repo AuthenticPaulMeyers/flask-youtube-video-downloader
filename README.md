@@ -14,4 +14,7 @@ A video downloader using youtube video links.
 ## 4. Wait for the download to complete
 <img src="/images/4.png">
 
+## 4. Locate the file in the downloads folder
+<img src="/images/5.png">
+
 ## 5. Do it again -_-
