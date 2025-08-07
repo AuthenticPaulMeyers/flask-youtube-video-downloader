@@ -246,12 +246,14 @@
                 statusMessage.textContent = `Downloading...    | Speed: ${speed}`;
                 statusMessage.className = 'message info';
                 statusMessage.style.display = 'block';
+
             } else if (data.status === 'finished') {
                 progressFill.style.width = '100%';
                 progressFill.textContent = '100%';
                 statusMessage.textContent = `Download complete!`;
                 statusMessage.className = 'message success';
                 statusMessage.style.display = 'block';
+                // enable the close pop up button
                 closeProgressBtn.classList.remove('hide');
 
                 // close the popup progress
@@ -268,14 +270,21 @@
                     downloadVideoBtn.classList.add('hover:bg-gray-800');
                     downloadVideoBtn.classList.remove('cursor-not-allowed');
                 }
-                return
             } else if (data.status === 'error') {
                 progressBar.style.display = 'none';
                 statusMessage.textContent = data.message;
                 statusMessage.className = 'message error';
                 statusMessage.style.display = 'block';
-                
+                closeProgressBtn.classList.remove('hide');
                 downloadVideoBtn.disabled = false; // Re-enable button
+                downloadVideoBtn.disabled = false; // Re-enable button
+                if(downloadVideoBtn.disabled == false){
+                    downloadVideoBtn.classList.add('bg-gray-900');
+                    downloadVideoBtn.classList.remove('bg-gray-400');
+                    downloadVideoBtn.classList.add('cursor-pointer');
+                    downloadVideoBtn.classList.add('hover:bg-gray-800');
+                    downloadVideoBtn.classList.remove('cursor-not-allowed');
+                }
             }
         });
 
