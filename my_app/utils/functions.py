@@ -196,11 +196,12 @@ def audio_downloader(url, socketio):
 
         download_options = {
             'outtmpl': output_template,
-            'format': 'bestaudio/best',
+            'format': 'bestaudio[ext=m4a]/bestaudio/best',  # Prioritize m4a format for audio
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
+                'nopostoverwrites': False,
             }],
             'progress_hooks': [download_hook],
             'socket_timeout': 60,  # Increased timeout to 60 seconds
@@ -212,6 +213,10 @@ def audio_downloader(url, socketio):
             'overwrites': True,  # Overwrite existing files
             'quiet': False,  # Show output for debugging
             'no_warnings': False,  # Show warnings
+            'keep_video': False,  # Don't keep the video file after extracting audio
+            'postprocessor_args': {
+                'ffmpeg_audio': ['-q:a', '0'],  # Use highest quality for mp3
+            },
         }
 
         try:
