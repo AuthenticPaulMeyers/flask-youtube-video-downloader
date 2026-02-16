@@ -13,9 +13,9 @@ import tempfile
 # Get the path to the user's Downloads folder
 home_dir = os.path.expanduser("~")
 
-downloads_folder = os.path.join(home_dir, 'Downloads')
+downloads_folder = os.path.join(home_dir, 'Downloads', 'yt-downloads')
 
-os.makedirs(downloads_folder, exist_ok=True) # Create the downloads folder if it doesnt exist
+os.makedirs(downloads_folder, exist_ok=True) # Create the yt-downloads folder if it doesnt exist
 
 # Create a temporary directory for yt-dlp to store cache and temporary files
 custom_temp_dir = tempfile.mkdtemp()
@@ -66,6 +66,8 @@ def get_url_info(url):
         'noplaylist': True,
         'skip_download': True,
         'verbose': False,
+        'js_runtime': 'node',  # Use Node.js for JavaScript execution
+        'socket_timeout': 60,  # Increased timeout to reduce timeout errors
     }
 
     try:
@@ -126,6 +128,13 @@ def video_downloader(url, quality, socketio):
             'progress_hooks': [download_hook],
             'socket_timeout': 60,  # Increased timeout to 60 seconds
             'cachedir': custom_temp_dir,  # Use custom temporary directory
+            'js_runtime': 'node',  # Use Node.js for JavaScript execution to extract signatures
+            'retries': 5,  # Increase retries for failed downloads
+            'fragment_retries': 5,  # Retry failed fragments
+            'skip_unavailable_fragments': True,  # Skip fragments that fail after retries
+            'overwrites': True,  # Overwrite existing files
+            'quiet': False,  # Show output for debugging
+            'no_warnings': False,  # Show warnings
         }
 
         try:
@@ -196,6 +205,13 @@ def audio_downloader(url, socketio):
             'progress_hooks': [download_hook],
             'socket_timeout': 60,  # Increased timeout to 60 seconds
             'cachedir': custom_temp_dir,  # Use custom temporary directory
+            'js_runtime': 'node',  # Use Node.js for JavaScript execution to extract signatures
+            'retries': 5,  # Increase retries for failed downloads
+            'fragment_retries': 5,  # Retry failed fragments
+            'skip_unavailable_fragments': True,  # Skip fragments that fail after retries
+            'overwrites': True,  # Overwrite existing files
+            'quiet': False,  # Show output for debugging
+            'no_warnings': False,  # Show warnings
         }
 
         try:
