@@ -18,7 +18,20 @@ downloads_folder = os.path.join(home_dir, 'Downloads', 'yt-downloads')
 os.makedirs(downloads_folder, exist_ok=True) # Create the yt-downloads folder if it doesnt exist
 
 # Create a temporary directory for yt-dlp to store cache and temporary files
+import shutil
 custom_temp_dir = tempfile.mkdtemp()
+
+# Function to safely clear yt-dlp cache
+def clear_ytdlp_cache():
+    try:
+        cache_dir = os.path.expanduser('~/.cache/yt-dlp')
+        if os.path.exists(cache_dir):
+            shutil.rmtree(cache_dir)
+    except:
+        pass
+
+# Clear cache on startup
+clear_ytdlp_cache()
 
 # A custom progress hook function
 def my_hook(d):
@@ -194,46 +207,44 @@ def audio_downloader(url, socketio):
     def download_thread():
         output_template = os.path.join(downloads_folder, '%(title)s.%(ext)s')
 
+        # Minimal options to avoid any postprocessing
         download_options = {
             'outtmpl': output_template,
-            'format': 'bestaudio[ext=m4a]/bestaudio/best',  # Prioritize m4a format for audio
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-                'nopostoverwrites': False,
-            }],
+            'format': 'worstaudio',
             'progress_hooks': [download_hook],
-            'socket_timeout': 60,  # Increased timeout to 60 seconds
-            'cachedir': custom_temp_dir,  # Use custom temporary directory
-            'js_runtime': 'node',  # Use Node.js for JavaScript execution to extract signatures
-            'retries': 5,  # Increase retries for failed downloads
-            'fragment_retries': 5,  # Retry failed fragments
-            'skip_unavailable_fragments': True,  # Skip fragments that fail after retries
-            'overwrites': True,  # Overwrite existing files
-            'quiet': False,  # Show output for debugging
-            'no_warnings': False,  # Show warnings
-            'keep_video': False,  # Don't keep the video file after extracting audio
-            'postprocessor_args': {
-                'ffmpeg_audio': ['-q:a', '0'],  # Use highest quality for mp3
-            },
+            'socket_timeout': 60,
+            'retries': 5,
+            'fragment_retries': 5,
+            'skip_unavailable_fragments': True,
+            'overwrites': True,
+            'quiet': False,
+            'no_warnings': False,
+            'no_post_overwrites': True,
+            'keep_video': False,
         }
 
         try:
             with yt_dlp.YoutubeDL(download_options) as audio:
-                audio.download([url])
+                info = audio.extract_info(url, download=False)
+                if info:
+                    # Download without any postprocessing
+                    audio.download([url])
+                    socketio.emit('progress', {
+                        'status': 'finished',
+                        'filename': info.get('title', 'Audio'),
+                        'message': 'Audio downloaded successfully!'
+                    })
         
         except yt_dlp.utils.DownloadError as e:
             socketio.emit('progress', {
                 'status': 'error',
-                'message': f"An unexpected error occurred: {str(e)}"
-            }), 400
+                'message': f"Download error: {str(e)}"
+            })
         except Exception as e:
-            # Emit an error if something goes wrong with yt-dlp itself
             socketio.emit('progress', {
                 'status': 'error',
-                'message': f"An unexpected error occurred: {str(e)}"
+                'message': f"Error: {str(e)}"
             })
-    # Start the thread to handle the download
+    
     thread = threading.Thread(target=download_thread)
     thread.start()
