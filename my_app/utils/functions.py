@@ -3,6 +3,8 @@ import yt_dlp
 import threading
 from flask_socketio import emit
 import re
+import tempfile
+
 # Required:
 # Create a video downloader function wrap the download video functionalities.
 # Pass arguements such as video quality and format.
@@ -14,6 +16,9 @@ home_dir = os.path.expanduser("~")
 downloads_folder = os.path.join(home_dir, 'Downloads')
 
 os.makedirs(downloads_folder, exist_ok=True) # Create the downloads folder if it doesnt exist
+
+# Create a temporary directory for yt-dlp to store cache and temporary files
+custom_temp_dir = tempfile.mkdtemp()
 
 # A custom progress hook function
 def my_hook(d):
@@ -119,6 +124,8 @@ def video_downloader(url, quality, socketio):
             'outtmpl': output_template,
             'format': f'bestvideo[ext=mp4][height<={quality}]+bestaudio[ext=m4a]/best[ext=mp4][height<={quality}]',
             'progress_hooks': [download_hook],
+            'socket_timeout': 60,  # Increased timeout to 60 seconds
+            'cachedir': custom_temp_dir,  # Use custom temporary directory
         }
 
         try:
@@ -187,6 +194,8 @@ def audio_downloader(url, socketio):
                 'preferredquality': '192',
             }],
             'progress_hooks': [download_hook],
+            'socket_timeout': 60,  # Increased timeout to 60 seconds
+            'cachedir': custom_temp_dir,  # Use custom temporary directory
         }
 
         try:
